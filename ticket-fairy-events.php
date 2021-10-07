@@ -12,7 +12,7 @@
  * Plugin Name:       Ticket Fairy Events
  * Plugin URI:        https://www.ticketfairy.com/
  * Description:       Allows showing Ticket Fairy events using Wordpress Shortcodes
- * Version:           1.0.1
+ * Version:           1.0.2
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ticket Fairy
@@ -125,10 +125,10 @@ function ttf_events_list($args = [], $content = null): string
         endDatetime = dateFormatter.format(endDatetime)
         
         return $(`<div class="event-box d-flex mx-auto flex-column flex-md-row"></div>`)
-            .append( $(`<div class="w-100 w-md-30">
+            .append( $(`<div class="event-image w-100 w-md-30">
                             <img class="w-100" src="${event.flyer_image}">
                         </div>`) )
-            .append( $(`<div class="d-flex flex-column w-100 w-md-60">
+            .append( $(`<div class="event-data d-flex flex-column w-100 w-md-60">
                             <h2 class="event-title"><strong>${event.name}</strong></h1>
                             <h4 class="event-date">From: ${startDatetime}</h4>
                             <h4 class="event-date">To: ${endDatetime}</h4>
