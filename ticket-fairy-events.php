@@ -12,7 +12,7 @@
  * Plugin Name:       Ticket Fairy Events
  * Plugin URI:        https://www.ticketfairy.com/
  * Description:       Allows showing Ticket Fairy events using Wordpress Shortcodes
- * Version:           1.0.0
+ * Version:           1.0.1
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ticket Fairy
