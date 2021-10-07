@@ -102,7 +102,15 @@ function ttf_events_list($args = [], $content = null): string
     function renderEvents() {
         const eventsListNode = $("#events-list")
         
-        eventsListNode.empty();
+        console.log(currEvents)
+        
+        currEvents.sort(function (x, y) {
+            return (x.date < y.date) ? -1 : 1
+        })
+        
+        console.log(currEvents)
+        
+        eventsListNode.empty()
         
         $.each(currEvents, function (idx, event) {
             const newNode = getEventHtmlNode(event)
