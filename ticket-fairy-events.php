@@ -102,6 +102,8 @@ function ttf_events_list($args = [], $content = null): string
     function renderEvents() {
         const eventsListNode = $("#events-list")
         
+        eventsListNode.empty();
+        
         $.each(currEvents, function (idx, event) {
             const newNode = getEventHtmlNode(event)
             eventsListNode.append(newNode)
