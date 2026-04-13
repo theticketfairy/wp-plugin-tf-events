@@ -23,16 +23,11 @@
  * Update URI:        https://github.com/theticketfairy/wp-plugin-tf-events
  */
 
-add_action('wp_enqueue_scripts', 'ttf_events_enqueue_assets');
 add_shortcode('ttf_events_list', 'ttf_events_list');
-
-function ttf_events_enqueue_assets(): void
-{
-    wp_enqueue_script('jquery');
-}
 
 function ttf_events_list($args = [], $content = null): string
 {
+    wp_enqueue_script('jquery');
     static $instance = 0;
     $instance++;
 
@@ -53,30 +48,23 @@ function ttf_events_list($args = [], $content = null): string
     var venueId = ' . wp_json_encode($venueId) . ';
     var container = $("#' . $containerId . '");
     var currEvents = [];
-    var currEventIds = {};
-
-    function escapeHtml(str) {
-        if (!str) return "";
-        var div = document.createElement("div");
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-    }
+    var currEventIds = new Set();
 
     function processResponse(responseObj) {
         mergeEvents(responseObj.data || []);
     }
 
     function mergeEvents(newEvents) {
-        var prevSize = Object.keys(currEventIds).length;
+        var prevSize = currEventIds.size;
 
         $.each(newEvents, function(idx, event) {
-            if (!currEventIds[event.id]) {
-                currEventIds[event.id] = true;
+            if (!currEventIds.has(event.id)) {
+                currEventIds.add(event.id);
                 currEvents.push(event);
             }
         });
 
-        if (Object.keys(currEventIds).length > prevSize) {
+        if (currEventIds.size > prevSize) {
             renderEvents();
         }
     }
@@ -108,8 +96,10 @@ function ttf_events_list($args = [], $content = null): string
         var locale = navigator.language || navigator.userLanguage;
         var dateFormatter = new Intl.DateTimeFormat(locale, options);
 
-        var startDatetime = dateFormatter.format(Date.parse(event.date));
-        var endDatetime = dateFormatter.format(Date.parse(event.end_date));
+        var startTs = Date.parse(event.date);
+        var startDatetime = isNaN(startTs) ? "TBC" : dateFormatter.format(startTs);
+        var endTs = Date.parse(event.end_date);
+        var endDatetime = isNaN(endTs) ? "TBC" : dateFormatter.format(endTs);
 
         var box = $("<div class=\"ttf-event-box d-flex mx-auto flex-column flex-md-row\"></div>");
 
@@ -121,8 +111,14 @@ function ttf_events_list($args = [], $content = null): string
         dataWrap.append($("<h4 class=\"ttf-event-date\"></h4>").text("From: " + startDatetime));
         dataWrap.append($("<h4 class=\"ttf-event-date\"></h4>").text("To: " + endDatetime));
 
+        var safeHref = "#";
+        try {
+            var parsed = new URL(event.url, window.location.origin);
+            if (/^https?:$/.test(parsed.protocol)) safeHref = parsed.href;
+        } catch (e) {}
+
         var btn = $("<button></button>").text("Get Tickets");
-        var link = $("<a class=\"ttf-event-link\"></a>").attr("href", event.url).attr("target", "_blank").append(btn);
+        var link = $("<a class=\"ttf-event-link\"></a>").attr("href", safeHref).attr("target", "_blank").attr("rel", "noopener noreferrer").append(btn);
         dataWrap.append(link);
 
         box.append(imageWrap).append(dataWrap);
