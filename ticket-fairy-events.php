@@ -23,176 +23,166 @@
  * Update URI:        https://github.com/theticketfairy/wp-plugin-tf-events
  */
 
+define('TTF_EVENTS_VERSION', '1.1.0');
+
+add_action('wp_enqueue_scripts', 'ttf_events_register_assets');
 add_shortcode('ttf_events_list', 'ttf_events_list');
+
+function ttf_events_register_assets(): void
+{
+    wp_register_script('ttf-events', false, ['jquery'], TTF_EVENTS_VERSION, true);
+    wp_register_style('ttf-events', false, [], TTF_EVENTS_VERSION);
+    wp_add_inline_script('ttf-events', ttf_events_inline_js());
+    wp_add_inline_style('ttf-events', ttf_events_inline_css());
+}
 
 function ttf_events_list($args = [], $content = null): string
 {
-    wp_enqueue_script('jquery');
-    static $instance = 0;
-    $instance++;
+    wp_enqueue_script('ttf-events');
+    wp_enqueue_style('ttf-events');
 
-    $brandId = esc_attr($args["brand"] ?? '');
-    $venueId = esc_attr($args["venue"] ?? '');
+    $brandId = $args['brand'] ?? '';
+    $venueId = $args['venue'] ?? '';
 
-    $containerId = 'ttf-events-' . $instance;
+    return sprintf(
+        '<div class="ttf-events" data-brand="%s" data-venue="%s"><div class="ttf-events-list"></div></div>',
+        esc_attr($brandId),
+        esc_attr($venueId)
+    );
+}
 
-    return '
-<div id="' . $containerId . '">
-    <div class="ttf-events-list"></div>
-</div>
+function ttf_events_inline_css(): string
+{
+    return <<<CSS
+.ttf-events .d-flex { display: flex; }
+.ttf-events .flex-column { flex-direction: column; }
+.ttf-events .w-100 { width: 100% !important; }
+.ttf-events .mx-auto { margin-left: auto !important; margin-right: auto !important; }
+.ttf-event-box { justify-content: space-around; margin-bottom: 2rem; }
+.ttf-event-link { display: inline-block; padding: 0.5rem 1rem; text-decoration: none; border: 1px solid currentColor; }
+@media (min-width: 768px) {
+    .ttf-events .flex-md-row { flex-direction: row !important; }
+    .ttf-events .w-md-30 { width: 30% !important; }
+    .ttf-events .w-md-60 { width: 60% !important; }
+    .ttf-event-title { margin-top: 2rem; }
+    .ttf-event-date { margin-top: 1.25rem; }
+    .ttf-event-link { margin-top: 1.5rem; }
+}
+CSS;
+}
 
-<script>
+function ttf_events_inline_js(): string
+{
+    return <<<'JS'
 (function($) {
     var ENDPOINT = "https://www.theticketfairy.com/api/public/filtered-events";
-    var brandId = ' . wp_json_encode($brandId) . ';
-    var venueId = ' . wp_json_encode($venueId) . ';
-    var container = $("#' . $containerId . '");
-    var currEvents = [];
-    var currEventIds = new Set();
 
-    function processResponse(responseObj) {
-        mergeEvents(responseObj.data || []);
-    }
+    function init($container) {
+        if ($container.data("ttfInit")) return;
+        $container.data("ttfInit", true);
 
-    function mergeEvents(newEvents) {
-        var prevSize = currEventIds.size;
+        var brandId = String($container.data("brand") || "");
+        var venueId = String($container.data("venue") || "");
+        var $list = $container.find(".ttf-events-list");
+        var currEvents = [];
+        var currEventIds = new Set();
+        var pending = 0;
+        var receivedAny = false;
 
-        $.each(newEvents, function(idx, event) {
-            if (!currEventIds.has(event.id)) {
-                currEventIds.add(event.id);
-                currEvents.push(event);
+        function mergeEvents(newEvents) {
+            var prevSize = currEventIds.size;
+            $.each(newEvents, function(idx, evt) {
+                if (!currEventIds.has(evt.id)) {
+                    currEventIds.add(evt.id);
+                    currEvents.push(evt);
+                }
+            });
+            if (currEventIds.size > prevSize) render();
+        }
+
+        function render() {
+            currEvents.sort(function(x, y) { return (x.date < y.date) ? -1 : 1; });
+            $list.empty();
+            if (currEvents.length === 0) {
+                $list.append($("<p></p>").text("No events found."));
+                return;
             }
-        });
-
-        if (currEventIds.size > prevSize) {
-            renderEvents();
-        }
-    }
-
-    function renderEvents() {
-        var listNode = container.find(".ttf-events-list");
-
-        currEvents.sort(function(x, y) {
-            return (x.date < y.date) ? -1 : 1;
-        });
-
-        listNode.empty();
-
-        if (currEvents.length === 0) {
-            listNode.append("<p>No events found.</p>");
-            return;
+            $.each(currEvents, function(idx, evt) {
+                $list.append(buildEventNode(evt));
+            });
         }
 
-        $.each(currEvents, function(idx, event) {
-            listNode.append(getEventHtmlNode(event));
-        });
-    }
+        function buildEventNode(evt) {
+            var options = {
+                weekday: "long", year: "numeric", month: "long", day: "numeric",
+                hour: "numeric", minute: "numeric"
+            };
+            var locale = navigator.language || navigator.userLanguage;
+            var fmt = new Intl.DateTimeFormat(locale, options);
+            var startTs = Date.parse(evt.date);
+            var endTs = Date.parse(evt.end_date);
+            var start = isNaN(startTs) ? "TBC" : fmt.format(startTs);
+            var end = isNaN(endTs) ? "TBC" : fmt.format(endTs);
 
-    function getEventHtmlNode(event) {
-        var options = {
-            weekday: "long", year: "numeric", month: "long", day: "numeric",
-            hour: "numeric", minute: "numeric"
-        };
-        var locale = navigator.language || navigator.userLanguage;
-        var dateFormatter = new Intl.DateTimeFormat(locale, options);
+            var $box = $("<div class=\"ttf-event-box d-flex mx-auto flex-column flex-md-row\"></div>");
 
-        var startTs = Date.parse(event.date);
-        var startDatetime = isNaN(startTs) ? "TBC" : dateFormatter.format(startTs);
-        var endTs = Date.parse(event.end_date);
-        var endDatetime = isNaN(endTs) ? "TBC" : dateFormatter.format(endTs);
+            var $img = $("<img class=\"w-100\">")
+                .attr("src", evt.flyer_image)
+                .attr("alt", evt.name || "");
+            var $imageWrap = $("<div class=\"ttf-event-image w-100 w-md-30\"></div>").append($img);
 
-        var box = $("<div class=\"ttf-event-box d-flex mx-auto flex-column flex-md-row\"></div>");
+            var $dataWrap = $("<div class=\"ttf-event-data d-flex flex-column w-100 w-md-60\"></div>");
+            $dataWrap.append($("<h2 class=\"ttf-event-title\"></h2>").append($("<strong></strong>").text(evt.name || "")));
+            $dataWrap.append($("<h4 class=\"ttf-event-date\"></h4>").text("From: " + start));
+            $dataWrap.append($("<h4 class=\"ttf-event-date\"></h4>").text("To: " + end));
 
-        var img = $("<img class=\"w-100\">").attr("src", event.flyer_image);
-        var imageWrap = $("<div class=\"ttf-event-image w-100 w-md-30\"></div>").append(img);
+            var safeHref = null;
+            try {
+                var parsed = new URL(evt.url, window.location.origin);
+                if (/^https?:$/.test(parsed.protocol)) safeHref = parsed.href;
+            } catch (e) {}
 
-        var dataWrap = $("<div class=\"ttf-event-data d-flex flex-column w-100 w-md-60\"></div>");
-        dataWrap.append($("<h2 class=\"ttf-event-title\"></h2>").append($("<strong></strong>").text(event.name)));
-        dataWrap.append($("<h4 class=\"ttf-event-date\"></h4>").text("From: " + startDatetime));
-        dataWrap.append($("<h4 class=\"ttf-event-date\"></h4>").text("To: " + endDatetime));
+            if (safeHref) {
+                $dataWrap.append(
+                    $("<a class=\"ttf-event-link\"></a>")
+                        .attr("href", safeHref)
+                        .attr("target", "_blank")
+                        .attr("rel", "noopener noreferrer")
+                        .text("Get Tickets")
+                );
+            }
 
-        var safeHref = "#";
-        try {
-            var parsed = new URL(event.url, window.location.origin);
-            if (/^https?:$/.test(parsed.protocol)) safeHref = parsed.href;
-        } catch (e) {}
-
-        var btn = $("<button></button>").text("Get Tickets");
-        var link = $("<a class=\"ttf-event-link\"></a>").attr("href", safeHref).attr("target", "_blank").attr("rel", "noopener noreferrer").append(btn);
-        dataWrap.append(link);
-
-        box.append(imageWrap).append(dataWrap);
-        return box;
-    }
-
-    $(document).ready(function() {
-        if (brandId.length > 0) {
-            $.get(ENDPOINT, { filters: { item_type: "brand", item_id: brandId } })
-                .done(processResponse)
-                .fail(function() { container.find(".ttf-events-list").append("<p>Unable to load events.</p>"); });
+            $box.append($imageWrap).append($dataWrap);
+            return $box;
         }
 
-        if (venueId.length > 0) {
-            $.get(ENDPOINT, { filters: { item_type: "venue", item_id: venueId } })
-                .done(processResponse)
-                .fail(function() { container.find(".ttf-events-list").append("<p>Unable to load events.</p>"); });
+        function load(type, id) {
+            pending++;
+            $.get(ENDPOINT, { filters: { item_type: type, item_id: id } })
+                .done(function(resp) {
+                    receivedAny = true;
+                    mergeEvents((resp && resp.data) || []);
+                })
+                .always(function() {
+                    pending--;
+                    if (pending === 0 && !receivedAny && currEvents.length === 0) {
+                        $list.empty().append($("<p></p>").text("Unable to load events."));
+                    }
+                });
         }
 
         if (brandId.length === 0 && venueId.length === 0) {
-            container.find(".ttf-events-list").append("<p>No events found.</p>");
+            $list.append($("<p></p>").text("No events found."));
+            return;
         }
+
+        if (brandId.length > 0) load("brand", brandId);
+        if (venueId.length > 0) load("venue", venueId);
+    }
+
+    $(function() {
+        $(".ttf-events").each(function() { init($(this)); });
     });
 })(jQuery);
-</script>
-
-<style>
-    .d-flex {
-        display: flex;
-    }
-
-    .flex-column {
-        flex-direction: column;
-    }
-
-    .w-100 {
-        width: 100% !important;
-    }
-
-    .mx-auto {
-        margin-left: auto !important;
-        margin-right: auto !important;
-    }
-
-    .ttf-event-box {
-        justify-content: space-around;
-        margin-bottom: 2rem;
-    }
-
-    @media(min-width: 768px) {
-        .flex-md-row {
-            flex-direction: row !important;
-        }
-
-        .w-md-30 {
-            width: 30% !important;
-        }
-
-        .w-md-60 {
-            width: 60% !important;
-        }
-
-        .ttf-event-title {
-            margin-top: 2rem;
-        }
-
-        .ttf-event-date {
-            margin-top: 1.25rem;
-        }
-
-        .ttf-event-link {
-            margin-top: 1.5rem;
-        }
-    }
-</style>
-';
+JS;
 }
