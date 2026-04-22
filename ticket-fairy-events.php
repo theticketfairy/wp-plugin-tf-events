@@ -90,18 +90,20 @@ function ttf_events_inline_js(): string
         var receivedAny = false;
 
         function mergeEvents(newEvents) {
-            var prevSize = currEventIds.size;
             $.each(newEvents, function(idx, evt) {
                 if (!currEventIds.has(evt.id)) {
                     currEventIds.add(evt.id);
                     currEvents.push(evt);
                 }
             });
-            if (currEventIds.size > prevSize) render();
+            render();
         }
 
         function render() {
-            currEvents.sort(function(x, y) { return (x.date < y.date) ? -1 : 1; });
+            currEvents.sort(function(x, y) {
+                if (x.date === y.date) return 0;
+                return x.date < y.date ? -1 : 1;
+            });
             $list.empty();
             if (currEvents.length === 0) {
                 $list.append($("<p></p>").text("No events found."));
@@ -126,11 +128,14 @@ function ttf_events_inline_js(): string
 
             var $box = $("<div class=\"ttf-event-box d-flex mx-auto flex-column flex-md-row\"></div>");
 
-            var $img = $("<img class=\"w-100\">")
-                .attr("src", evt.flyer_image)
-                .attr("alt", evt.name || "");
-            var $imageWrap = $("<div class=\"ttf-event-image w-100 w-md-30\"></div>").append($img);
-
+            var $imageWrap = $("<div class=\"ttf-event-image w-100 w-md-30\"></div>");
+            if (evt.flyer_image) {
+                $imageWrap.append(
+                    $("<img class=\"w-100\">")
+                        .attr("src", evt.flyer_image)
+                        .attr("alt", evt.name || "")
+                );
+            }
             var $dataWrap = $("<div class=\"ttf-event-data d-flex flex-column w-100 w-md-60\"></div>");
             $dataWrap.append($("<h2 class=\"ttf-event-title\"></h2>").append($("<strong></strong>").text(evt.name || "")));
             $dataWrap.append($("<h4 class=\"ttf-event-date\"></h4>").text("From: " + start));
