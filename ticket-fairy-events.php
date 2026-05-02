@@ -12,7 +12,7 @@
  * Plugin Name:       Ticket Fairy Events
  * Plugin URI:        https://github.com/theticketfairy/wp-plugin-tf-events
  * Description:       Display Ticket Fairy events using Wordpress Shortcodes
- * Version:           1.0.2
+ * Version:           1.0.3
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ticket Fairy
@@ -45,9 +45,9 @@ function ttf_events_list($args = [], $content = null): string
     let currEvents = [];
     let currEventIds = new Set();
     
-    $(document).ready(function() {
-        const brandId = $("#brand-id").val()
-        const venueId = $("#venue-id").val()
+    document.addEventListener("DOMContentLoaded", function() {
+        const brandId = document.getElementById("brand-id")?.value || ""
+        const venueId = document.getElementById("venue-id")?.value || ""
         
         const params_brand_req = {
             filters: {
@@ -64,21 +64,33 @@ function ttf_events_list($args = [], $content = null): string
         }
 
         if (brandId.length > 0) {
-            $.get(event_endpoint, params_brand_req)
-            .done(process_events_response)
-            .fail(function(data) {
-                console.log("Error getting events list: " + data)
-                })
+            fetchEvents(params_brand_req)
         }
             
         if (venueId.length > 0) {
-            $.get(event_endpoint, params_venue_req)
-            .done(process_events_response)
-            .fail(function(data) {
-                console.log("Error getting events list: " + data)
-                })
+            fetchEvents(params_venue_req)
         }
     })
+
+    function fetchEvents(paramsObj) {
+        const queryString = new URLSearchParams({
+            "filters[item_type]": paramsObj.filters.item_type,
+            "filters[item_id]": paramsObj.filters.item_id
+        }).toString()
+
+        fetch(`${event_endpoint}?${queryString}`)
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok")
+                }
+
+                return response.json()
+            })
+            .then(process_events_response)
+            .catch(function(error) {
+                console.log("Error getting events list:", error)
+            })
+    }
     
     function process_events_response(responseObj) {
         mergeEvents(responseObj.data);
@@ -87,7 +99,7 @@ function ttf_events_list($args = [], $content = null): string
     function mergeEvents(newEvents) {
         const prevSize = currEventIds.size
         
-        $.each(newEvents, function(idx, event) {
+        newEvents.forEach(function(event) {
             if ( !currEventIds.has(event.id) ) {
                 currEventIds.add(event.id)
                 currEvents.push(event)
@@ -100,7 +112,11 @@ function ttf_events_list($args = [], $content = null): string
     }
     
     function renderEvents() {
-        const eventsListNode = $("#events-list")
+        const eventsListNode = document.getElementById("events-list")
+
+        if (!eventsListNode) {
+            return
+        }
         
         console.log(currEvents)
         
@@ -110,11 +126,11 @@ function ttf_events_list($args = [], $content = null): string
         
         console.log(currEvents)
         
-        eventsListNode.empty()
+        eventsListNode.innerHTML = ""
         
-        $.each(currEvents, function (idx, event) {
+        currEvents.forEach(function(event) {
             const newNode = getEventHtmlNode(event)
-            eventsListNode.append(newNode)
+            eventsListNode.appendChild(newNode)
         })
     }
     
@@ -132,18 +148,61 @@ function ttf_events_list($args = [], $content = null): string
         let endDatetime = Date.parse(event.end_date)
         endDatetime = dateFormatter.format(endDatetime)
         
-        return $(`<div class="event-box d-flex mx-auto flex-column flex-md-row"></div>`)
-            .append( $(`<div class="event-image w-100 w-md-30">
-                            <img class="w-100" src="${event.flyer_image}">
-                        </div>`) )
-            .append( $(`<div class="event-data d-flex flex-column w-100 w-md-60">
-                            <h2 class="event-title"><strong>${event.name}</strong></h1>
-                            <h4 class="event-date">From: ${startDatetime}</h4>
-                            <h4 class="event-date">To: ${endDatetime}</h4>
-                            <a class="event-link" href="${event.url}" target="_blank">
-                                <button>Get Tickets</button>
-                            </a>
-                        </div>`) )
+        const wrapper = document.createElement("div")
+        wrapper.className = "event-box d-flex mx-auto flex-column flex-md-row"
+
+        const imageContainer = document.createElement("div")
+        imageContainer.className = "event-image w-100 w-md-30"
+
+        const imageLink = document.createElement("a")
+        imageLink.href = event.url
+        imageLink.target = "_blank"
+        imageLink.rel = "noopener noreferrer"
+
+        const image = document.createElement("img")
+        image.className = "w-100"
+        image.src = event.flyer_image
+        image.alt = event.name
+        imageLink.appendChild(image)
+        imageContainer.appendChild(imageLink)
+
+        const dataContainer = document.createElement("div")
+        dataContainer.className = "event-data d-flex flex-column w-100 w-md-60"
+
+        const title = document.createElement("h2")
+        title.className = "event-title"
+        const titleStrong = document.createElement("strong")
+        titleStrong.textContent = event.name
+        title.appendChild(titleStrong)
+
+        const startDate = document.createElement("h4")
+        startDate.className = "event-date"
+        startDate.textContent = `From: ${startDatetime}`
+
+        const endDate = document.createElement("h4")
+        endDate.className = "event-date"
+        endDate.textContent = `To: ${endDatetime}`
+
+        const eventLink = document.createElement("a")
+        eventLink.className = "event-link"
+        eventLink.href = event.url
+        eventLink.target = "_blank"
+        eventLink.rel = "noopener noreferrer"
+
+        const linkButton = document.createElement("button")
+        linkButton.type = "button"
+        linkButton.textContent = "Get Tickets"
+        eventLink.appendChild(linkButton)
+
+        dataContainer.appendChild(title)
+        dataContainer.appendChild(startDate)
+        dataContainer.appendChild(endDate)
+        dataContainer.appendChild(eventLink)
+
+        wrapper.appendChild(imageContainer)
+        wrapper.appendChild(dataContainer)
+
+        return wrapper
     }
     
 </script>

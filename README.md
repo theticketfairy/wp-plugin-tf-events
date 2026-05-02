@@ -1,10 +1,10 @@
 === Ticket Fairy Events ===
 
-Contributors: reinier92tf
+Contributors: reinier92tf, ash-ticketfairy
 Tags: ticketfairy, event, venue, ticketing
 Requires at least: 5.2
 Tested up to: 7.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -39,3 +39,6 @@ Simply deactivate and delete the plugin.
 
 = 1.0.2 =
 * Add classes for js and css customization support
+
+= 1.0.4 =
+* Replace jQuery with vanilla JavaScript, added link to poster
