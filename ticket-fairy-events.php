@@ -12,7 +12,7 @@
  * Plugin Name:       Ticket Fairy Events
  * Plugin URI:        https://github.com/theticketfairy/wp-plugin-tf-events
  * Description:       Display Ticket Fairy events using Wordpress Shortcodes
- * Version:           1.0.3
+ * Version:           1.0.5
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ticket Fairy
@@ -75,7 +75,8 @@ function ttf_events_list($args = [], $content = null): string
     function fetchEvents(paramsObj) {
         const queryString = new URLSearchParams({
             "filters[item_type]": paramsObj.filters.item_type,
-            "filters[item_id]": paramsObj.filters.item_id
+            "filters[item_id]": paramsObj.filters.item_id,
+            "filters[upcoming]": "true"
         }).toString()
 
         fetch(`${event_endpoint}?${queryString}`)
