@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ticket-fairy/tickets",
+  "version": "2.0.0",
+  "title": "Ticket Fairy Tickets",
+  "category": "widgets",
+  "icon": "tickets-alt",
+  "description": "Sell your Ticket Fairy tickets on this page: a Buy tickets button, the full checkout, your event list, set times or line-up.",
+  "keywords": ["tickets", "event", "checkout", "buy", "line-up"],
+  "textdomain": "ticket-fairy-events",
+  "attributes": {
+    "link": { "type": "string", "default": "" },
+    "show": {
+      "type": "string",
+      "enum": ["button", "checkout", "listing", "timetable", "lineup"],
+      "default": "button"
+    },
+    "event": { "type": "string", "default": "" },
+    "label": { "type": "string", "default": "" },
+    "embedKey": { "type": "string", "default": "" }
+  },
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"]
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./editor.css"
+}

@@ -1,0 +1,32 @@
+.ticket-fairy-preview {
+	padding: 16px 20px;
+	border: 1px dashed currentColor;
+	border-radius: 8px;
+	opacity: 0.9;
+}
+
+.ticket-fairy-preview p {
+	margin: 8px 0 0;
+}
+
+.ticket-fairy-preview__hint {
+	font-size: 13px;
+	opacity: 0.75;
+}
+
+.ticket-fairy-placeholder-fields,
+.ticket-fairy-event-picker {
+	width: 100%;
+	max-width: 520px;
+}
+
+.ticket-fairy-preview strong,
+.ticket-fairy-preview p {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.ticket-fairy-preview .ticket-fairy-preview__hint {
+	font-size: 13px;
+}
