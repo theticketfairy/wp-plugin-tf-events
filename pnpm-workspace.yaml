@@ -1,0 +1,6 @@
+packages:
+  - packages/*
+  - wordpress
+  - framer/*
+  - webflow
+  - wix

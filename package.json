@@ -1,0 +1,14 @@
+{
+  "name": "ticket-fairy-website-plugins",
+  "private": true,
+  "description": "Ticket Fairy plugins for website builders: WordPress, Wix, Webflow and Framer",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter ./packages/** --filter ./wordpress run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck"
+  }
+}
