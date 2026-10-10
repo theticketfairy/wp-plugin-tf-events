@@ -1,0 +1,47 @@
+    .d-flex {
+    display: flex;
+}
+    
+    .flex-column {
+    flex-direction: column;
+    }
+    
+    .w-100 {
+    width: 100% !important;
+}
+    
+    .mx-auto {
+    margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    
+    .event-box {
+    justify-content: space-around;
+        margin-bottom: 2rem;
+    }
+    
+    @media(min-width: 768px) {
+    .flex-md-row {
+        flex-direction: row !important;
+        }
+        
+        .w-md-30 {
+        width: 30% !important;
+    }
+        
+        .w-md-60 {
+        width: 60% !important;
+    }
+        
+        .event-title {
+        margin-top: 2rem;
+        }
+        
+        .event-date {
+        margin-top: 1.25rem;
+        }
+        
+        .event-link {
+        margin-top: 1.5rem;
+        }
+    }

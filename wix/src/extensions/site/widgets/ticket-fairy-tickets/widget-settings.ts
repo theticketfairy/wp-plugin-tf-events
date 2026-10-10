@@ -8,7 +8,6 @@
 import {
   brandPageUrl,
   embedAttributes,
-  isWidgetKey,
   eventPageUrl,
   isEmbedType,
   linkKindFor,
@@ -110,14 +109,6 @@ export function linkProblem(link: ParsedLink): string | null {
   }
 
   return "That link doesn't open an event page or a brand page. Copy the link from your event page or brand page."
-}
-
-/**
- * Whether an embed key will be used. The core drops a malformed key without a
- * word, so the panel checks it the same way and warns the organiser instead.
- */
-export function isUsableEmbedKey(key: string): boolean {
-  return isWidgetKey(key)
 }
 
 /**

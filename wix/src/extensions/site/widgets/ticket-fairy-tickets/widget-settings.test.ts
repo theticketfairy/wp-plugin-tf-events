@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { parseTicketFairyLink } from '@ticketfairy/site-embed-core'
 import {
   chosenType,
-  isUsableEmbedKey,
   linkProblem,
   placeholderAttributesFromProps,
   previewCopy,
@@ -97,13 +96,6 @@ describe('linkProblem', () => {
     expect(linkProblem(parseTicketFairyLink('https://www.ticketfairy.com/'))).toMatch(
       /event page or a brand page/
     )
-  })
-})
-
-describe('isUsableEmbedKey', () => {
-  it('accepts only a complete key', () => {
-    expect(isUsableEmbedKey('A'.repeat(64))).toBe(true)
-    expect(isUsableEmbedKey('abc')).toBe(false)
   })
 })
 

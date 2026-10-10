@@ -11,6 +11,9 @@ const LISTING_ENDPOINT = 'https://www.ticketfairy.com/api/embed/events/'
 
 export const EVENTS_PER_PAGE = 24
 
+// The endpoint serves at most 50 pages and repeats the last one after that.
+const LAST_PAGE = 50
+
 export interface BrandEvent {
   name: string
   eventSlug: string
@@ -89,7 +92,7 @@ export async function fetchBrandEvents(
   const body = (await response.json()) as ListingResponse
   const events = (body.events ?? []).map(toBrandEvent).filter((event): event is BrandEvent => event !== null)
 
-  return { events, hasMore: Boolean(body.pagination?.has_more) }
+  return { events, hasMore: page < LAST_PAGE && Boolean(body.pagination?.has_more) }
 }
 
 function formatEventDate(date: Date, timezone: string | null, locale?: string): string {

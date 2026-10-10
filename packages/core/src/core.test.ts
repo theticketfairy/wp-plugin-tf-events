@@ -37,6 +37,8 @@ describe('parseTicketFairyLink', () => {
     ['https://www.ticketfairy.com/event/a/b', 'unrecognised'],
     ['https://www.ticketfairy.com/pass/summer', 'unrecognised'],
     ['https://www.ticketfairy.com/event/<script>', 'unrecognised'],
+    ['javascript://www.ticketfairy.com/event/anyma', 'not-ticket-fairy'],
+    ['ftp://www.ticketfairy.com/event/anyma', 'not-ticket-fairy'],
   ])('rejects %j as %s', (link, reason) => {
     expect(parseTicketFairyLink(link)).toEqual({ kind: 'invalid', reason })
   })
@@ -104,6 +106,12 @@ describe('fetchBrandEvents', () => {
     expect(page.hasMore).toBe(true)
     expect(page.events).toHaveLength(1)
     expect(page.events[0]).toMatchObject({ name: 'Renaissance', eventSlug: 'renaissance', soldOut: false })
+  })
+
+  it('stops paging at the last page the server serves', async () => {
+    const fetchImpl = async () => jsonResponse(200, { events: [], pagination: { has_more: true } })
+    expect((await fetchBrandEvents('x', { page: 50, fetchImpl })).hasMore).toBe(false)
+    expect((await fetchBrandEvents('x', { page: 49, fetchImpl })).hasMore).toBe(true)
   })
 
   it('reports an unknown brand separately from other failures', async () => {

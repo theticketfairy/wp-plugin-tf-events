@@ -12,7 +12,9 @@
 import {
   EVENTS_PER_PAGE,
   BrandNotFoundError,
+  brandPageUrl,
   describeEvent,
+  eventPageUrl,
   fetchBrandEvents,
   linkKindFor,
   parseTicketFairyLink,
@@ -49,9 +51,10 @@ type EventsState =
   | { status: 'ready'; events: BrandEvent[]; hasMore: boolean; page: number }
   | { status: 'error'; brandMissing: boolean }
 
-const useBrandEvents = (brandSlug: string | null): [EventsState, () => void] => {
+const useBrandEvents = (brandSlug: string | null): [EventsState, () => void, () => void] => {
   const [state, setState] = useState({ status: 'idle' } as EventsState)
   const [page, setPage] = useState(1)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     if (!brandSlug) {
@@ -76,19 +79,33 @@ const useBrandEvents = (brandSlug: string | null): [EventsState, () => void] => 
       })
 
     return () => controller.abort()
-  }, [brandSlug, page])
+  }, [brandSlug, page, attempt])
 
-  return [state, () => setPage((current: number) => current + 1)]
+  const showMore = () => setPage((current: number) => current + 1)
+  // Start again from the first page, so no loaded events are lost or repeated.
+  const retry = () => {
+    setPage(1)
+    setAttempt((current: number) => current + 1)
+  }
+
+  return [state, showMore, retry]
 }
 
 const linkProblem = (link: string, show: EmbedType): string | null => {
   const parsed = parseTicketFairyLink(link)
 
   if (parsed.kind === 'invalid') {
-    return parsed.reason === 'empty'
-      ? null
-      : __(
+    if (parsed.reason === 'empty') {
+      return null
+    }
+
+    return parsed.reason === 'not-ticket-fairy'
+      ? __(
           "That isn't a Ticket Fairy link. Copy the link from your event page or brand page.",
+          'ticket-fairy-events'
+        )
+      : __(
+          "That link doesn't open an event page or a brand page. Copy the link from your event page or brand page.",
           'ticket-fairy-events'
         )
   }
@@ -112,14 +129,22 @@ const EventPicker = ({
   value: string
   onChange: (slug: string) => void
 }) => {
-  const [state, showMore] = useBrandEvents(brandSlug)
+  const [state, showMore, retry] = useBrandEvents(brandSlug)
 
   if (state.status === 'error') {
     return (
       <Notice status="error" isDismissible={false}>
         {state.brandMissing
           ? __("We couldn't find that brand page. Check the link and try again.", 'ticket-fairy-events')
-          : __("We couldn't load your events. Check your connection and try again.", 'ticket-fairy-events')}
+          : __(
+              "We couldn't load your events. Check your connection and try again.",
+              'ticket-fairy-events'
+            )}{' '}
+        {!state.brandMissing && (
+          <Button variant="link" onClick={retry}>
+            {__('Try again', 'ticket-fairy-events')}
+          </Button>
+        )}
       </Notice>
     )
   }
@@ -194,6 +219,13 @@ const Edit = ({ attributes, setAttributes }: EditProps) => {
   const problem = linkProblem(link, show)
   const needsEventChoice = !problem && parsed.kind === 'brand' && show !== 'listing'
   const preview = previewText(attributes)
+  // Built from the parsed link, never the raw text, so the link always opens ticketfairy.com.
+  const pageLink =
+    parsed.kind === 'event'
+      ? eventPageUrl(parsed.eventSlug)
+      : parsed.kind === 'brand'
+        ? brandPageUrl(parsed.brandSlug)
+        : null
 
   const linkField = (
     <TextControl
@@ -311,8 +343,8 @@ const Edit = ({ attributes, setAttributes }: EditProps) => {
         <p>{preview}</p>
         <p className="ticket-fairy-preview__hint">
           {__('Visitors see the live tickets when you preview or publish the page.', 'ticket-fairy-events')}{' '}
-          {parsed.kind !== 'invalid' && (
-            <ExternalLink href={link.startsWith('http') ? link : `https://${link}`}>
+          {pageLink && (
+            <ExternalLink href={pageLink}>
               {__('Open your Ticket Fairy page', 'ticket-fairy-events')}
             </ExternalLink>
           )}

@@ -1,9 +1,9 @@
 === Ticket Fairy Events ===
 Contributors: reinier92tf, ash-ticketfairy
 Tags: tickets, events, ticketing, checkout, event registration
-Requires at least: 6.1
+Requires at least: 6.3
 Tested up to: 7.1
-Requires PHP: 7.4
+Requires PHP: 7.2
 Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -97,7 +97,7 @@ Ticket Fairy and your payment provider, exactly as on your Ticket Fairy event pa
 * New: the Ticket Fairy Tickets block. Sell tickets on your page with a Buy tickets button, the checkout, your event list, set times or line-up.
 * New: choose an event from your brand's upcoming events.
 * New: the `[ticketfairy]` shortcode.
-* The original `[ttf_events_list]` shortcode is unchanged.
+* The original `[ttf_events_list]` shortcode shows the same list, and you can now use it more than once on a page.
 
 = 1.0.5 =
 * Show upcoming events only.
@@ -117,4 +117,4 @@ Ticket Fairy and your payment provider, exactly as on your Ticket Fairy event pa
 == Upgrade Notice ==
 
 = 2.0.0 =
-Adds the Ticket Fairy Tickets block so buyers can buy tickets without leaving your site. Your existing shortcodes keep working.
+Adds the Ticket Fairy Tickets block so buyers can buy tickets without leaving your site. Your existing shortcodes keep working. If you installed an earlier version by uploading it from GitHub, deactivate and delete that copy after you activate this one.

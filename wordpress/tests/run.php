@@ -76,6 +76,8 @@ foreach ( array(
 	'https://www.ticketfairy.com/event/a/b',
 	'https://www.ticketfairy.com/pass/summer',
 	'https://www.ticketfairy.com/event/<script>',
+	'javascript://www.ticketfairy.com/event/anyma',
+	'ftp://www.ticketfairy.com/event/anyma',
 ) as $link ) {
 	check( "rejects $link", null, Embed::parse_link( $link ) );
 }

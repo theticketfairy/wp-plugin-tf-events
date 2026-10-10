@@ -4,7 +4,7 @@
  * widget's attribute of the same name.
  */
 import React, { useEffect, useRef, useState, type FC } from 'react'
-import { linkKindFor, parseTicketFairyLink, type EmbedType } from '@ticketfairy/site-embed-core'
+import { isWidgetKey, linkKindFor, parseTicketFairyLink, type EmbedType } from '@ticketfairy/site-embed-core'
 import { widget } from '@wix/editor'
 import {
   Box,
@@ -25,7 +25,6 @@ import {
   PROP_NAMES,
   SHOW_OPTIONS,
   chosenType,
-  isUsableEmbedKey,
   linkProblem,
   propsForNewLink,
   type PropKey,
@@ -199,7 +198,7 @@ const Panel: FC = () => {
           <Box direction="vertical" gap="SP1" marginTop="SP3">
             <FormField
               label="Embed key (optional)"
-              status={embedKey && !isUsableEmbedKey(embedKey) ? 'warning' : undefined}
+              status={embedKey && !isWidgetKey(embedKey) ? 'warning' : undefined}
               statusMessage="This embed key is incomplete. Copy it again from your Ticket Fairy dashboard."
             >
               <Input value={embedKey} onChange={(event) => save({ embedKey: event.target.value })} />

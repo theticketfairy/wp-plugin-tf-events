@@ -12,8 +12,8 @@
  * Plugin URI:        https://github.com/theticketfairy/wp-plugin-tf-events
  * Description:       Sell Ticket Fairy tickets on your site: a Buy tickets button, the full checkout, your event list, set times or line-up. No code needed.
  * Version:           2.0.0
- * Requires at least: 6.1
- * Requires PHP:      7.4
+ * Requires at least: 6.3
+ * Requires PHP:      7.2
  * Author:            Ticket Fairy
  * Author URI:        https://www.ticketfairy.com/
  * Text Domain:       ticket-fairy-events

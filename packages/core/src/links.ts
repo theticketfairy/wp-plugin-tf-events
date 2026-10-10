@@ -43,6 +43,10 @@ export function parseTicketFairyLink(input: string): ParsedLink {
     return { kind: 'invalid', reason: 'unrecognised' }
   }
 
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    return { kind: 'invalid', reason: 'not-ticket-fairy' }
+  }
+
   if (!ACCEPTED_HOSTS.has(url.hostname.toLowerCase())) {
     return { kind: 'invalid', reason: 'not-ticket-fairy' }
   }

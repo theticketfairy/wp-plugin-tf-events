@@ -62,7 +62,7 @@ final class Embed {
 
 		$parts = wp_parse_url( $link );
 
-		if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
+		if ( ! is_array( $parts ) || empty( $parts['host'] ) || ! in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ) {
 			return null;
 		}
 
@@ -159,7 +159,7 @@ final class Embed {
 			// Visitors see nothing. Editors see why, so a broken link is easy to find.
 			if ( current_user_can( 'edit_posts' ) ) {
 				return '<p class="ticket-fairy-embed-notice">'
-					. esc_html__( 'Ticket Fairy: this block needs a Ticket Fairy event link or brand page link. Only editors see this message.', 'ticket-fairy-events' )
+					. esc_html__( 'Ticket Fairy: enter a Ticket Fairy event page link or brand page link here to show tickets. Only editors see this message.', 'ticket-fairy-events' )
 					. '</p>';
 			}
 

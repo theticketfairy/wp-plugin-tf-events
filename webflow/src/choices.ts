@@ -44,9 +44,13 @@ export function embedSettingsFor(choices: PanelChoices): EmbedSettings {
 /** The problem to show under the link field, or null when there is nothing to fix. */
 export function linkProblem(link: ParsedLink, type: EmbedType): string | null {
   if (link.kind === 'invalid') {
-    return link.reason === 'empty'
-      ? null
-      : "That isn't a Ticket Fairy link. Copy the link from your event page or brand page."
+    if (link.reason === 'empty') {
+      return null
+    }
+
+    return link.reason === 'not-ticket-fairy'
+      ? "That isn't a Ticket Fairy link. Copy the link from your event page or brand page."
+      : "That link doesn't open an event page or a brand page. Copy the link from your event page or brand page."
   }
 
   if (link.kind === 'event' && linkKindFor(type) === 'brand') {

@@ -20,6 +20,9 @@
     } catch {
       return { kind: "invalid", reason: "unrecognised" };
     }
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+      return { kind: "invalid", reason: "not-ticket-fairy" };
+    }
     if (!ACCEPTED_HOSTS.has(url.hostname.toLowerCase())) {
       return { kind: "invalid", reason: "not-ticket-fairy" };
     }
@@ -35,6 +38,12 @@
     }
     return { kind: "invalid", reason: "unrecognised" };
   }
+  function eventPageUrl(eventSlug) {
+    return `https://www.ticketfairy.com/event/${encodeURIComponent(eventSlug)}`;
+  }
+  function brandPageUrl(brandSlug) {
+    return `https://www.ticketfairy.com/events/${encodeURIComponent(brandSlug)}`;
+  }
 
   // ../packages/core/src/embeds.ts
   var LOADER_URL = "https://www.ticketfairy.com/resources/js/event-embed.js";
@@ -46,6 +55,7 @@
   // ../packages/core/src/events.ts
   var LISTING_ENDPOINT = "https://www.ticketfairy.com/api/embed/events/";
   var EVENTS_PER_PAGE = 24;
+  var LAST_PAGE = 50;
   var BrandNotFoundError = class extends Error {
     constructor(brandSlug) {
       super(`No Ticket Fairy brand page found for "${brandSlug}"`);
@@ -82,7 +92,7 @@
     }
     const body = await response.json();
     const events = ((_a = body.events) != null ? _a : []).map(toBrandEvent).filter((event) => event !== null);
-    return { events, hasMore: Boolean((_b = body.pagination) == null ? void 0 : _b.has_more) };
+    return { events, hasMore: page < LAST_PAGE && Boolean((_b = body.pagination) == null ? void 0 : _b.has_more) };
   }
   function formatEventDate(date, timezone, locale) {
     const options = { weekday: "short", day: "numeric", month: "short", year: "numeric" };
@@ -159,6 +169,7 @@
   var useBrandEvents = (brandSlug) => {
     const [state, setState] = useState({ status: "idle" });
     const [page, setPage] = useState(1);
+    const [attempt, setAttempt] = useState(0);
     useEffect(() => {
       if (!brandSlug) {
         setState({ status: "idle" });
@@ -175,14 +186,25 @@
         }
       });
       return () => controller.abort();
-    }, [brandSlug, page]);
-    return [state, () => setPage((current) => current + 1)];
+    }, [brandSlug, page, attempt]);
+    const showMore = () => setPage((current) => current + 1);
+    const retry = () => {
+      setPage(1);
+      setAttempt((current) => current + 1);
+    };
+    return [state, showMore, retry];
   };
   var linkProblem = (link, show) => {
     const parsed = parseTicketFairyLink(link);
     if (parsed.kind === "invalid") {
-      return parsed.reason === "empty" ? null : __2(
+      if (parsed.reason === "empty") {
+        return null;
+      }
+      return parsed.reason === "not-ticket-fairy" ? __2(
         "That isn't a Ticket Fairy link. Copy the link from your event page or brand page.",
+        "ticket-fairy-events"
+      ) : __2(
+        "That link doesn't open an event page or a brand page. Copy the link from your event page or brand page.",
         "ticket-fairy-events"
       );
     }
@@ -199,9 +221,12 @@
     value,
     onChange
   }) => {
-    const [state, showMore] = useBrandEvents(brandSlug);
+    const [state, showMore, retry] = useBrandEvents(brandSlug);
     if (state.status === "error") {
-      return /* @__PURE__ */ wp.element.createElement(Notice, { status: "error", isDismissible: false }, state.brandMissing ? __2("We couldn't find that brand page. Check the link and try again.", "ticket-fairy-events") : __2("We couldn't load your events. Check your connection and try again.", "ticket-fairy-events"));
+      return /* @__PURE__ */ wp.element.createElement(Notice, { status: "error", isDismissible: false }, state.brandMissing ? __2("We couldn't find that brand page. Check the link and try again.", "ticket-fairy-events") : __2(
+        "We couldn't load your events. Check your connection and try again.",
+        "ticket-fairy-events"
+      ), " ", !state.brandMissing && /* @__PURE__ */ wp.element.createElement(Button, { variant: "link", onClick: retry }, __2("Try again", "ticket-fairy-events")));
     }
     const events = state.status === "idle" ? [] : state.events;
     const selected = events.find((event) => event.eventSlug === value);
@@ -253,6 +278,7 @@
     const problem = linkProblem(link, show);
     const needsEventChoice = !problem && parsed.kind === "brand" && show !== "listing";
     const preview = previewText(attributes);
+    const pageLink = parsed.kind === "event" ? eventPageUrl(parsed.eventSlug) : parsed.kind === "brand" ? brandPageUrl(parsed.brandSlug) : null;
     const linkField = /* @__PURE__ */ wp.element.createElement(
       TextControl,
       {
@@ -329,7 +355,7 @@
         ) : /* @__PURE__ */ wp.element.createElement("div", { className: "ticket-fairy-placeholder-fields" }, linkField, problem && /* @__PURE__ */ wp.element.createElement(Notice, { status: "warning", isDismissible: false }, problem))
       ));
     }
-    return /* @__PURE__ */ wp.element.createElement("div", { ...blockProps }, settings, advancedSettings, /* @__PURE__ */ wp.element.createElement("div", { className: "ticket-fairy-preview" }, /* @__PURE__ */ wp.element.createElement("strong", null, __2("Ticket Fairy Tickets", "ticket-fairy-events")), /* @__PURE__ */ wp.element.createElement("p", null, preview), /* @__PURE__ */ wp.element.createElement("p", { className: "ticket-fairy-preview__hint" }, __2("Visitors see the live tickets when you preview or publish the page.", "ticket-fairy-events"), " ", parsed.kind !== "invalid" && /* @__PURE__ */ wp.element.createElement(ExternalLink, { href: link.startsWith("http") ? link : `https://${link}` }, __2("Open your Ticket Fairy page", "ticket-fairy-events")))));
+    return /* @__PURE__ */ wp.element.createElement("div", { ...blockProps }, settings, advancedSettings, /* @__PURE__ */ wp.element.createElement("div", { className: "ticket-fairy-preview" }, /* @__PURE__ */ wp.element.createElement("strong", null, __2("Ticket Fairy Tickets", "ticket-fairy-events")), /* @__PURE__ */ wp.element.createElement("p", null, preview), /* @__PURE__ */ wp.element.createElement("p", { className: "ticket-fairy-preview__hint" }, __2("Visitors see the live tickets when you preview or publish the page.", "ticket-fairy-events"), " ", pageLink && /* @__PURE__ */ wp.element.createElement(ExternalLink, { href: pageLink }, __2("Open your Ticket Fairy page", "ticket-fairy-events")))));
   };
   registerBlockType("ticket-fairy/tickets", {
     edit: Edit,
