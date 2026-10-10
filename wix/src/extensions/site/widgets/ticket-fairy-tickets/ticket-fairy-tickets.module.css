@@ -1,0 +1,26 @@
+/* The editor preview card. The live embed brings its own styles. */
+.preview {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 100%;
+  padding: 16px 20px;
+  border: 2px dashed #b6c1cd;
+  border-radius: 8px;
+  background: #f7f8fa;
+  color: #20303c;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.title {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.detail {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
