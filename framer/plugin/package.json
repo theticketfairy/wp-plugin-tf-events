@@ -1,0 +1,33 @@
+{
+  "name": "@ticketfairy/framer-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Ticket Fairy Tickets plugin for Framer",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "pack": "framer-plugin-tools pack",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@framer/plugin": "5.1.0",
+    "@ticketfairy/framer-component": "workspace:*",
+    "@ticketfairy/site-embed-core": "workspace:*",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "6.1.2",
+    "framer-plugin-tools": "1.2.2",
+    "typescript": "5.6.3",
+    "vite": "8.3.4",
+    "vite-plugin-framer": "1.1.1",
+    "vite-plugin-mkcert": "1.17.12",
+    "vitest": "2.1.9"
+  }
+}
