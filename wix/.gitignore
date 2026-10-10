@@ -1,0 +1,9 @@
+# Made by `astro sync`, `wix dev` and `wix build`
+.astro/
+.wix/
+dist/
+
+# Made by `wix env pull`: this app's Wix credentials
+.env
+.env.local
+.env.production
