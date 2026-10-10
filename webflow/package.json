@@ -1,0 +1,24 @@
+{
+  "name": "@ticketfairy/webflow-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Webflow Designer Extension that adds Ticket Fairy tickets to a Webflow page",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "serve": "pnpm dlx @webflow/webflow-cli@2.12.0 extension serve",
+    "build": "vite build",
+    "bundle": "vite build && pnpm dlx @webflow/webflow-cli@2.12.0 extension bundle",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ticketfairy/site-embed-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@webflow/designer-extension-typings": "2.2.2",
+    "typescript": "5.6.3",
+    "vite": "5.4.21",
+    "vitest": "2.1.9"
+  }
+}
