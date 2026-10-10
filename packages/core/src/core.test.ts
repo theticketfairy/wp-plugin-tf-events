@@ -5,6 +5,7 @@ import {
   embedAttributes,
   embedPlaceholderHtml,
   fetchBrandEvents,
+  isWidgetKey,
   parseTicketFairyLink,
 } from './index'
 
@@ -134,5 +135,13 @@ describe('describeEvent', () => {
 
   it('survives an unknown time zone', () => {
     expect(describeEvent({ ...event, timezone: 'Not/AZone' }, 'en-GB')).toMatch(/\d{4} · Zamna Tulum/)
+  })
+})
+
+describe('isWidgetKey', () => {
+  it('accepts only a complete 64-character key', () => {
+    expect(isWidgetKey(` ${'AB'.repeat(32)} `)).toBe(true)
+    expect(isWidgetKey('ab'.repeat(31))).toBe(false)
+    expect(isWidgetKey(undefined)).toBe(false)
   })
 })

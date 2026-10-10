@@ -33,6 +33,11 @@ export interface EmbedSettings {
 
 const WIDGET_KEY_PATTERN = /^[a-f0-9]{64}$/
 
+/** True when the text is a complete embed key from the dashboard. */
+export function isWidgetKey(value: string | undefined): boolean {
+  return WIDGET_KEY_PATTERN.test((value ?? '').trim().toLowerCase())
+}
+
 export function isEmbedType(value: unknown): value is EmbedType {
   return typeof value === 'string' && (EMBED_TYPES as readonly string[]).includes(value)
 }
@@ -63,10 +68,8 @@ export function embedAttributes(settings: EmbedSettings): Record<string, string>
     attributes['data-label'] = label
   }
 
-  const widgetKey = settings.widgetKey?.trim().toLowerCase()
-
-  if (widgetKey && WIDGET_KEY_PATTERN.test(widgetKey)) {
-    attributes['data-widget-key'] = widgetKey
+  if (isWidgetKey(settings.widgetKey)) {
+    attributes['data-widget-key'] = (settings.widgetKey as string).trim().toLowerCase()
   }
 
   return attributes

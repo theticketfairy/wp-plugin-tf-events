@@ -45,7 +45,7 @@ The contract the plugins depend on lives in the `legacy` repository, in
 pnpm install
 pnpm test        # every package's tests
 pnpm typecheck
-pnpm build       # core checks, the WordPress block editor bundle and the Framer component and plugin
+pnpm build       # every plugin except Wix, whose build needs a Wix app (see wix/README.md)
 ```
 
 Each builder folder has its own README with the steps to run it locally and to submit it to its

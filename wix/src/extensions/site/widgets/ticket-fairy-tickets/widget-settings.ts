@@ -8,6 +8,7 @@
 import {
   brandPageUrl,
   embedAttributes,
+  isWidgetKey,
   eventPageUrl,
   isEmbedType,
   linkKindFor,
@@ -113,10 +114,10 @@ export function linkProblem(link: ParsedLink): string | null {
 
 /**
  * Whether an embed key will be used. The core drops a malformed key without a
- * word, so the panel asks the core and warns the organiser instead.
+ * word, so the panel checks it the same way and warns the organiser instead.
  */
 export function isUsableEmbedKey(key: string): boolean {
-  return Boolean(embedAttributes({ type: 'button', eventSlug: 'check', widgetKey: key })?.['data-widget-key'])
+  return isWidgetKey(key)
 }
 
 /**

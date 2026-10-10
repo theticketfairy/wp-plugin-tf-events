@@ -5,7 +5,7 @@
   "description": "Block editor bundle for the Ticket Fairy Events WordPress plugin",
   "scripts": {
     "build": "node build.mjs",
-    "test": "vitest run && php tests/run.php",
+    "test": "php tests/run.php",
     "typecheck": "tsc --noEmit",
     "zip": "node build.mjs && cd ticket-fairy-events && zip -rq ../ticket-fairy-events.zip . -x '*.DS_Store'"
   },
@@ -14,7 +14,6 @@
   },
   "devDependencies": {
     "esbuild": "0.24.2",
-    "typescript": "5.6.3",
-    "vitest": "2.1.9"
+    "typescript": "5.6.3"
   }
 }
