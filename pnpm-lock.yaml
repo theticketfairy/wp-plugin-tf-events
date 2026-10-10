@@ -88,6 +88,25 @@ importers:
         specifier: 2.1.9
         version: 2.1.9(lightningcss@1.33.0)
 
+  webflow:
+    dependencies:
+      '@ticketfairy/site-embed-core':
+        specifier: workspace:*
+        version: link:../packages/core
+    devDependencies:
+      '@webflow/designer-extension-typings':
+        specifier: 2.2.2
+        version: 2.2.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vite:
+        specifier: 5.4.21
+        version: 5.4.21(lightningcss@1.33.0)
+      vitest:
+        specifier: 2.1.9
+        version: 2.1.9(lightningcss@1.33.0)
+
   wordpress:
     dependencies:
       '@ticketfairy/site-embed-core':
@@ -850,6 +869,9 @@ packages:
 
   '@vitest/utils@2.1.9':
     resolution: {integrity: sha512-v0psaMSkNJ3A2NMrUEHFRzJtDPFn+/VWZ5WxImB21T9fjucJRmS7xCS3ppEnARb9y11OAzaD+P2Ps+b+BGX5iQ==}
+
+  '@webflow/designer-extension-typings@2.2.2':
+    resolution: {integrity: sha512-VoLXnVccpkKkF3M3feoyPV2cZY/qjYWLQnP5ntpc/HLiR+LwNFUHniCRQ1rx5L2katem6ySicNAjlMc240LIQA==}
 
   adm-zip@0.5.18:
     resolution: {integrity: sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==}
@@ -1719,6 +1741,8 @@ snapshots:
       '@vitest/pretty-format': 2.1.9
       loupe: 3.2.1
       tinyrainbow: 1.2.0
+
+  '@webflow/designer-extension-typings@2.2.2': {}
 
   adm-zip@0.5.18: {}
 

@@ -1,0 +1,66 @@
+<!-- The Webflow CLI and Webflow wrap this file in their own page, so it holds body content only. -->
+<link rel="stylesheet" href="./src/styles.css" />
+<main class="panel">
+  <form id="embed-form" novalidate>
+    <label class="field">
+      <span class="field-label">Your Ticket Fairy link</span>
+      <input
+        id="link"
+        type="url"
+        inputmode="url"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="https://www.ticketfairy.com/event/…"
+      />
+      <span class="hint">Paste the link to your event page or brand page.</span>
+      <span id="link-problem" class="problem" role="alert" hidden></span>
+    </label>
+
+    <label class="field">
+      <span class="field-label">What to show</span>
+      <select id="type"></select>
+    </label>
+
+    <section id="event-picker" class="field" hidden>
+      <span class="field-label" id="event-picker-label">Choose an event</span>
+      <div id="event-list" class="event-list" role="radiogroup" aria-labelledby="event-picker-label"></div>
+      <p id="events-status" class="hint" role="status"></p>
+      <button type="button" id="retry-events" class="secondary" hidden>Try again</button>
+      <button type="button" id="more-events" class="secondary" hidden>Show more events</button>
+    </section>
+
+    <label class="field" id="button-label-field">
+      <span class="field-label">Button text</span>
+      <input id="button-label" type="text" maxlength="60" placeholder="Buy tickets" />
+    </label>
+
+    <details class="field">
+      <summary>Advanced</summary>
+      <label class="field">
+        <span class="field-label">Embed key</span>
+        <input id="widget-key" type="text" autocomplete="off" spellcheck="false" />
+        <span class="hint">
+          From Embed on your website in your Ticket Fairy dashboard. Only needed for saved colours and
+          allowed websites.
+        </span>
+        <span id="widget-key-problem" class="problem" role="alert" hidden></span>
+      </label>
+    </details>
+
+    <p class="hint">The tickets go after the element you select on the page, or at the end of the page.</p>
+    <button type="submit" id="add" disabled>Add to page</button>
+    <p id="add-result" role="status"></p>
+  </form>
+
+  <details id="setup" class="setup">
+    <summary id="setup-summary">One last step, only once per site</summary>
+    <p>In <strong>Site settings → Custom code → Footer code</strong>, paste this line:</p>
+    <div class="copy-row">
+      <input id="loader-line" type="text" readonly aria-label="Line to paste into Footer code" />
+      <button type="button" id="copy" class="secondary">Copy</button>
+    </div>
+    <p class="hint">Publish your site to see it working. The tickets don't show inside the Designer.</p>
+    <label class="check"><input type="checkbox" id="setup-done" /> I've done this</label>
+  </details>
+</main>
+<script type="module" src="./src/main.ts"></script>
