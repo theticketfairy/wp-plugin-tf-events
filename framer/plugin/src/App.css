@@ -1,0 +1,86 @@
+/* Colours come from Framer's variables, which follow the editor's light or dark mode. */
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100%;
+  padding: 0 15px 15px;
+  box-sizing: border-box;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.field-title {
+  font-weight: 600;
+  color: var(--framer-color-text);
+}
+
+.field input,
+.field select {
+  width: 100%;
+}
+
+.message {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--framer-color-text-tertiary);
+}
+
+.message p {
+  margin: 0 0 6px;
+}
+
+.problem {
+  color: var(--framer-color-text);
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.event-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  height: auto;
+  padding: 8px 10px;
+  text-align: left;
+  border: 1px solid transparent;
+}
+
+.event-option[aria-selected='true'] {
+  border-color: var(--framer-color-tint);
+}
+
+.event-name {
+  font-weight: 600;
+  color: var(--framer-color-text);
+}
+
+.event-detail {
+  font-size: 11px;
+  color: var(--framer-color-text-tertiary);
+}
+
+footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+footer .framer-button-primary {
+  width: 100%;
+}
