@@ -1,0 +1,37 @@
+{
+  "name": "@ticketfairy/wix",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ticket Fairy app for Wix: a site widget that sells Ticket Fairy tickets on a Wix site",
+  "type": "module",
+  "scripts": {
+    "dev": "wix dev",
+    "build": "wix build",
+    "preview": "wix preview",
+    "release": "wix release",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ticketfairy/site-embed-core": "workspace:*",
+    "@wix/astro": "2.75.2",
+    "@wix/design-system": "1.334.0",
+    "@wix/editor": "1.915.0",
+    "@wix/site-window": "1.59.0",
+    "astro": "5.18.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@astrojs/cloudflare": "12.6.13",
+    "@astrojs/react": "4.4.2",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@wix/astro-wix-hosting-adapter": "2.0.4",
+    "@wix/cli": "1.1.258",
+    "@wix/sdk-types": "1.17.12",
+    "happy-dom": "20.14.6",
+    "typescript": "5.9.3",
+    "vitest": "2.1.9"
+  }
+}
