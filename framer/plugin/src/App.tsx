@@ -39,11 +39,16 @@ export function App() {
   const canAdd = useIsAllowedTo('addComponentInstance')
 
   const link = parseTicketFairyLink(linkText)
-  const brandSlug = useDebouncedValue(link.kind === 'brand' ? link.brandSlug : null, TYPING_PAUSE_MS)
+  const typedBrandSlug = link.kind === 'brand' ? link.brandSlug : null
+  const brandSlug = useDebouncedValue(typedBrandSlug, TYPING_PAUSE_MS)
   const brandEvents = useBrandEvents(brandSlug)
+  // During the typing pause the list still belongs to the previous link, so
+  // its events must not be offered for the new one.
+  const listIsForThisLink = brandSlug === typedBrandSlug
   const controls = buildControls({ link, chosenEventSlug, show, buttonText })
   const showsOneEvent = link.kind === 'event' || (link.kind === 'brand' && chosenEventSlug !== null)
-  const isBrandMissing = link.kind === 'brand' && brandEvents.problem === EVENTS_PROBLEMS.brandNotFound
+  const isBrandMissing =
+    link.kind === 'brand' && listIsForThisLink && brandEvents.problem === EVENTS_PROBLEMS.brandNotFound
 
   const changeLink = (text: string) => {
     setLinkText(text)
@@ -97,23 +102,28 @@ export function App() {
                 onChoose={() => setChosenEventSlug(null)}
               />
             )}
-            {brandEvents.events.map((event) => (
-              <EventOption
-                key={event.eventSlug}
-                title={event.name}
-                detail={[describeEvent(event), event.soldOut ? 'Sold out' : ''].filter(Boolean).join(' · ')}
-                isChosen={chosenEventSlug === event.eventSlug}
-                onChoose={() => setChosenEventSlug(event.eventSlug)}
-              />
-            ))}
-            {brandEvents.isLoading && <p className="message">Loading your events…</p>}
-            {!brandEvents.isLoading && !brandEvents.problem && brandEvents.events.length === 0 && (
-              <p className="message">
-                No upcoming events yet. You can still add the event list. It shows events once they are
-                on sale.
-              </p>
-            )}
-            {brandEvents.problem && (
+            {!listIsForThisLink && <p className="message">Loading your events…</p>}
+            {listIsForThisLink &&
+              brandEvents.events.map((event) => (
+                <EventOption
+                  key={event.eventSlug}
+                  title={event.name}
+                  detail={[describeEvent(event), event.soldOut ? 'Sold out' : ''].filter(Boolean).join(' · ')}
+                  isChosen={chosenEventSlug === event.eventSlug}
+                  onChoose={() => setChosenEventSlug(event.eventSlug)}
+                />
+              ))}
+            {listIsForThisLink && brandEvents.isLoading && <p className="message">Loading your events…</p>}
+            {listIsForThisLink &&
+              !brandEvents.isLoading &&
+              !brandEvents.problem &&
+              brandEvents.events.length === 0 && (
+                <p className="message">
+                  No upcoming events yet. You can still add the event list. It shows events once they are on
+                  sale.
+                </p>
+              )}
+            {listIsForThisLink && brandEvents.problem && (
               <div className="message problem">
                 <p>{brandEvents.problem}</p>
                 <button onClick={brandEvents.tryAgain}>Try again</button>

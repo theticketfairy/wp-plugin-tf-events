@@ -189,6 +189,9 @@ function onLinkChanged(): void {
   eventsRequest?.abort()
   eventListState = null
   renderEventList()
+  // The earlier update() still saw the old brand's result, such as a missing
+  // brand page that disabled Add.
+  update()
   window.clearTimeout(linkSettleTimer)
 
   if (nextLink.kind === 'brand') {
