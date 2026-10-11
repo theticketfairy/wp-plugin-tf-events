@@ -50,6 +50,9 @@ const loadProps = async (): Promise<WidgetProps> => {
   return Object.fromEntries(PROP_KEYS.map((key, index) => [key, values[index] ?? ''])) as WidgetProps
 }
 
+// Marks writes skipped because an earlier write in the queue failed.
+const SAVE_CANCELLED = new Error('Save cancelled after an earlier failure')
+
 const Panel: FC = () => {
   const [props, setProps] = useState<WidgetProps | null>(null)
   const [linkInput, setLinkInput] = useState('')
@@ -58,6 +61,9 @@ const Panel: FC = () => {
   const [loadFailed, setLoadFailed] = useState(false)
   const [saveFailed, setSaveFailed] = useState(false)
   const pendingWrites = useRef<Promise<void>>(Promise.resolve())
+  const saveGeneration = useRef(0)
+  const cancelledThrough = useRef(0)
+  const recovering = useRef(false)
 
   useEffect(() => {
     loadProps()
@@ -90,18 +96,38 @@ const Panel: FC = () => {
   }
 
   const save = (changes: WidgetProps) => {
+    // While the panel reloads after a failed save, changes are not saved. A
+    // change made from unsaved values could pair a new link with an old event.
+    if (recovering.current) {
+      return
+    }
+
+    const generation = ++saveGeneration.current
     setProps((current) => ({ ...current, ...changes }))
     setSaveFailed(false)
 
-    // One write at a time, in key order. After a failed write the rest of this
-    // change is skipped and the panel reloads what Wix stored, so it never
-    // shows a value the widget does not have.
+    // One write at a time, in key order. A failed write cancels the rest of
+    // this change and every change queued behind it, then the panel reloads
+    // what Wix stored, so it never shows a value the widget does not have.
     const writes = (Object.keys(changes) as PropKey[]).reduce(
-      (chain, key) => chain.then(() => setPropConfirmed(key, changes[key] ?? '')),
+      (chain, key) =>
+        chain.then(() => {
+          if (generation <= cancelledThrough.current) {
+            throw SAVE_CANCELLED
+          }
+
+          return setPropConfirmed(key, changes[key] ?? '')
+        }),
       pendingWrites.current
     )
 
-    pendingWrites.current = writes.catch(async () => {
+    pendingWrites.current = writes.catch(async (error: unknown) => {
+      if (error === SAVE_CANCELLED) {
+        return
+      }
+
+      recovering.current = true
+      cancelledThrough.current = saveGeneration.current
       setSaveFailed(true)
 
       try {
@@ -110,6 +136,8 @@ const Panel: FC = () => {
         setLinkInput(saved.link ?? '')
       } catch {
         // The error message stays; closing and opening Settings loads them again.
+      } finally {
+        recovering.current = false
       }
     })
   }
