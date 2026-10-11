@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "pack": "framer-plugin-tools pack",
+    "pack": "node scripts/check-component-url.mjs && framer-plugin-tools pack",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
