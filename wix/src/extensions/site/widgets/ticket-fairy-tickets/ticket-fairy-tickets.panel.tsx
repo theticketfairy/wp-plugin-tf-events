@@ -93,12 +93,25 @@ const Panel: FC = () => {
     setProps((current) => ({ ...current, ...changes }))
     setSaveFailed(false)
 
-    for (const key of Object.keys(changes) as PropKey[]) {
-      const value = changes[key] ?? ''
-      pendingWrites.current = pendingWrites.current
-        .then(() => setPropConfirmed(key, value))
-        .catch(() => setSaveFailed(true))
-    }
+    // One write at a time, in key order. After a failed write the rest of this
+    // change is skipped and the panel reloads what Wix stored, so it never
+    // shows a value the widget does not have.
+    const writes = (Object.keys(changes) as PropKey[]).reduce(
+      (chain, key) => chain.then(() => setPropConfirmed(key, changes[key] ?? '')),
+      pendingWrites.current
+    )
+
+    pendingWrites.current = writes.catch(async () => {
+      setSaveFailed(true)
+
+      try {
+        const saved = await loadProps()
+        setProps(saved)
+        setLinkInput(saved.link ?? '')
+      } catch {
+        // The error message stays; closing and opening Settings loads them again.
+      }
+    })
   }
 
   const problem = linkTouched ? linkProblem(parseTicketFairyLink(linkInput)) : null

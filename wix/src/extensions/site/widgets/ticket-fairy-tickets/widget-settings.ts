@@ -120,7 +120,10 @@ export function linkProblem(link: ParsedLink): string | null {
 export function propsForNewLink(current: WidgetProps, newLink: string): WidgetProps {
   const before = parseTicketFairyLink(current.link ?? '')
   const after = parseTicketFairyLink(newLink)
-  const changes: WidgetProps = { link: newLink.trim() }
+  // The panel saves changes in key order. Clearing the old event comes before
+  // the new link, so a save that stops part way can never pair a new brand
+  // with an event from the old one.
+  const changes: WidgetProps = {}
   const sameBrand = before.kind === 'brand' && after.kind === 'brand' && before.brandSlug === after.brandSlug
 
   if (!sameBrand && (current.event || current.eventName)) {
@@ -131,6 +134,8 @@ export function propsForNewLink(current: WidgetProps, newLink: string): WidgetPr
   if (after.kind === 'event' && current.show === 'listing') {
     changes.show = ''
   }
+
+  changes.link = newLink.trim()
 
   return changes
 }

@@ -30,9 +30,10 @@ function render_events_list( $atts ) {
 		'ttf_events_list'
 	);
 
-	$assets = plugin_dir_url( __DIR__ ) . 'assets/';
-	wp_enqueue_style( 'ticket-fairy-events-list', $assets . 'legacy-events-list.css', array(), '2.0.0' );
-	wp_enqueue_script( 'ticket-fairy-events-list', $assets . 'legacy-events-list.js', array(), '2.0.0', true );
+	// Shortcodes outside the post content (widgets, templates) get the styles
+	// here. WordPress then prints them in the footer, because the head is done.
+	enqueue_events_list_style();
+	wp_enqueue_script( 'ticket-fairy-events-list', plugin_dir_url( __DIR__ ) . 'assets/legacy-events-list.js', array(), '2.0.0', true );
 
 	// The hidden fields and the events-list id are the 1.0.5 markup, which
 	// site scripts and styles may still use.
@@ -43,3 +44,21 @@ function render_events_list( $atts ) {
 		. '</div>';
 }
 add_shortcode( 'ttf_events_list', __NAMESPACE__ . '\render_events_list' );
+
+function enqueue_events_list_style() {
+	wp_enqueue_style( 'ticket-fairy-events-list', plugin_dir_url( __DIR__ ) . 'assets/legacy-events-list.css', array(), '2.0.0' );
+}
+
+/**
+ * Loads the list styles in the head when the post content has the shortcode,
+ * as the inline styles of version 1.0.5 did. Shortcodes run after the head is
+ * printed, so enqueuing only from the shortcode would load them late.
+ */
+function enqueue_events_list_style_for_post() {
+	$post = get_post();
+
+	if ( $post && has_shortcode( $post->post_content, 'ttf_events_list' ) ) {
+		enqueue_events_list_style();
+	}
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_events_list_style_for_post' );

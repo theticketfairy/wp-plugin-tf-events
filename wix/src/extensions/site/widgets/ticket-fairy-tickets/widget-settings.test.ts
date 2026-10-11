@@ -100,6 +100,15 @@ describe('linkProblem', () => {
 })
 
 describe('propsForNewLink', () => {
+  it('clears the old event before saving the new link', () => {
+    const changes = propsForNewLink(
+      { link: 'https://www.ticketfairy.com/events/old-brand', event: 'old-party', eventName: 'Old party' },
+      'https://www.ticketfairy.com/events/new-brand'
+    )
+
+    expect(Object.keys(changes)).toEqual(['event', 'eventName', 'link'])
+  })
+
   it('clears the chosen event when the brand changes', () => {
     const current = { link: BRAND_LINK, event: 'renaissance', eventName: 'Renaissance' }
 
